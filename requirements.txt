@@ -1,0 +1,13 @@
+langchain
+langchain-community
+langchain-groq
+PyGithub
+chromadb
+python-dotenv
+pydantic
+fastembed==0.8.0
+langgraph
+langgraph-checkpoint
+streamlit
+ragas
+datasets
