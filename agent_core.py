@@ -62,7 +62,7 @@ class VibeArchitectEngine:
     def __init__(self):
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
-            raise ValueError("未找到 GROQ_API_KEY，请优先配置。")
+            raise ValueError("Set GROQ_API_KEY before starting VibeArchitect.")
 
         # 初始化强大的 Groq LLM
         self.llm = ChatGroq(model=LLM_MODEL, temperature=0.2)
@@ -173,7 +173,7 @@ REQUIREMENTS:
      b. You MUST ONLY use alphanumeric characters (English) for Node IDs. Never use Chinese, spaces, or special characters for Node IDs!
      c. If your node labels contain spaces, brackets, parentheses or Chinese characters, you MUST wrap the label text in double quotes! Example: `id1["API Gateway (FastAPI)"]` or `id2["向量数据库 [Chroma]"]`. 
      d. Do NOT use HTML formatting inside labels.
-4. Language Requirement: ALL text, explanations, and diagram comments MUST be written entirely in Simplified Chinese (简体中文), except for standard technical stack names.
+4. Write the proposal, explanations, and diagram labels in English.
 """
         
         # 如果这是修改轮次，我们要加进来 Critic 的无情嘲讽/反馈

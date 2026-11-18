@@ -1,46 +1,40 @@
-# VibeArchitect Copilot
+# VibeArchitect
 
-VibeArchitect Copilot 是一个基于 LangGraph 的溯源检索与多路自纠错系统架构 Copilot。利用先进的大语言模型技术（如 HyDE - Hypothetical Document Embeddings，和 RAG 检索增强生成）来理解用户的需求并自动起草、纠错和生成专业的大型系统架构。
+VibeArchitect is a Streamlit prototype that drafts software architecture proposals from short requirements. It retrieves relevant passages from an index of public GitHub documentation and uses them to inform the draft.
 
-## 特色功能
+## Workflow
 
-- **LangGraph 原生架构**：通过基于图的工作流与多路节点（包括假设性生成、检索、核心生成、自动打分裁判长等）实现自纠错与多次迭代循环，直到输出最优架构方案。
-- **实时 Mermaid图表渲染**：不仅生成文本架构描述，还能通过内嵌在网页中的 Mermaid.js 可视化渲染生成的系统架构图。
-- **RAG + 向量检索**：依靠 ChromaDB 与自定义检索策略为大语言模型提供实时的顶尖开源项目与架构片段知识源。
-- **流式 UI 交互**：通过 Streamlit 实现现代化极致简约与流式输出体验，能够透明展示代理模型的每一步思考和状态。
+1. PyGithub fetches repository documentation. The ingestion script splits Markdown by headings and text length, embeds it with FastEmbed, and persists the index in Chroma.
+2. A Groq-hosted model expands the request into a hypothetical reference document (HyDE). Chroma retrieves the five closest passages.
+3. LangGraph runs a draft and structured critique. Its routing logic can request another draft, subject to a revision limit.
+4. Streamlit shows the resulting proposal and renders Mermaid blocks when present.
 
-## 项目结构
+| File | Role |
+|---|---|
+| `data_pipeline.py` | Fetch, chunk, embed, and index documents |
+| `agent_core.py` | Retrieval, generation, critique, and routing |
+| `app.py` | Streamlit interface |
+| `evaluate.py` | Ragas evaluation script |
 
-- `app.py`: Streamlit 前端交互与入口。
-- `agent_core.py`: 基于 LangGraph 管理核心思维流与检索、生成、评估的节点定义。
-- `data_pipeline.py`: 数据清洗、特征工程和模型准备模块。
-- `evaluate.py`: 用于核心代码/系统的评估分析。
-- `requirements.txt`: 运行本项目的环境依赖配置文件。
+## Setup and usage
 
-## 如何运行
+From the repository root, create a Python virtual environment.
 
-1. 克隆本项目：
-   ```bash
-   git clone <repository_url>
-   cd VibeArchitect
-   ```
+```sh
+python -m venv .venv
+```
 
-2. 配置虚拟环境并安装依赖：
-   ```bash
-   # 为避免依赖冲突，建议使用 venv 或 conda
-   python -m venv .venv
-   source .venv/bin/activate  # Windows 为: .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+Activate it with `source .venv/bin/activate` on macOS or Linux or `.\.venv\Scripts\Activate.ps1` in PowerShell. Then run `python -m pip install -r requirements.txt`.
 
-3. 环境变量与配置：
-   请复制 `.env.example` 并重命名为 `.env`，填入所需的 API Keys 或其他机密配置。
+Create a local `.env`. Set `GITHUB_TOKEN` for GitHub ingestion and `GROQ_API_KEY` for generation. Run ingestion before starting the interface. Ingestion needs network access, and the embedding model may download on first use.
 
-4. 启动可视化界面：
-   ```bash
-   streamlit run app.py
-   ```
+```sh
+python data_pipeline.py
+python -m streamlit run app.py
+```
 
-## 开发与贡献
+Enter a short architecture request, such as “Design a shared study-room booking app with conflict checking.” The index is stored in `chroma_db/`.
 
-该架构还处于不断发展和完善的过程中。如果您对这种自纠错型 Agentic AI 机制感兴趣，欢迎 Fork 并提交 Pull Request。
+## Evaluation and limitations
+
+Run `python evaluate.py` with the index and provider credentials configured to measure faithfulness and answer relevance on the included prompts. Results depend on the corpus, model, and prompts. Model critique is an additional review step. Generated designs and diagrams still need human review.
